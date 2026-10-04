@@ -16,6 +16,8 @@ html, body {
   padding: 0;
   background-color: #ffffff;
   overflow-x: hidden; /* Supprime le scroll horizontal natif */
+  font-synthesis: none;   /* le navigateur n'invente plus de faux gras ni de faux italique */
+  font-weight: normal;    /* tes polices ont déjà leur graisse, pas besoin d'en ajouter */
 }
 
 #app {

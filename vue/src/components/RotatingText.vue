@@ -20,7 +20,7 @@ let timer: ReturnType<typeof setInterval> | null = null
 onMounted(() => {
   timer = setInterval(() => {
     index.value = (index.value + 1) % words.length
-  }, 5000) // changement toutes les 5 secondes
+  }, 4000) // changement toutes les 5 secondes
 })
 
 onUnmounted(() => {
@@ -30,7 +30,7 @@ onUnmounted(() => {
 
 <template>
   <div class="rotating-text">
-    <p class="rotating-static">Le mélange de</p>
+    <p class="rotating-static">Un mélange de</p>
 
     <div class="rotating-word-wrap">
       <Transition name="blur" mode="out-in">
