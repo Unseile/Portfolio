@@ -1,0 +1,26 @@
+/* Importation des fichiers de configuration */
+@import './colors.css';
+@import './fonts.css';
+
+/* --- REGLES GLOBALES DU VIEWPORT --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  overflow-x: hidden; /* Supprime le scroll horizontal natif */
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}

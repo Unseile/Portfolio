@@ -1,0 +1,38 @@
+@font-face {
+  font-family: 'Modak-Regular';
+  src: url('../fonts/Modak-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Kalnia-Medium';
+  src: url('../fonts/Kalnia-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Kalnia-Regular';
+  src: url('../fonts/Kalnia-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins-Extralight';
+  src: url('../fonts/Poppins-ExtraLight.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins-Regular';
+  src: url('../fonts/Poppins-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins-Semibold';
+  src: url('../fonts/Poppins-SemiBold.ttf') format('truetype');
+}
+
+:root {
+  --font-background: 'Modak-Regular', cursive;
+  --font-chapter: 'Kalnia-Regular';
+  --font-title: 'Kalnia-Medium';
+  --font-project-skill: 'Poppins-Extralight';
+  --font-body: 'Poppins-Regular';
+  --font-logo: 'Poppins-Semibold';
+}
