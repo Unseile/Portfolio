@@ -19,6 +19,11 @@
 }
 
 @font-face {
+  font-family: 'Poppins-Light';
+  src: url('../fonts/Poppins-Light.ttf') format('truetype');
+}
+
+@font-face {
   font-family: 'Poppins-Regular';
   src: url('../fonts/Poppins-Regular.ttf') format('truetype');
 }
@@ -33,6 +38,7 @@
   --font-chapter: 'Kalnia-Regular';
   --font-title: 'Kalnia-Medium';
   --font-project-skill: 'Poppins-Extralight';
+  --font-project-body: 'Poppins-Light';
   --font-body: 'Poppins-Regular';
   --font-logo: 'Poppins-Semibold';
 }

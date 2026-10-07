@@ -5,11 +5,32 @@ import { Observer } from "gsap/Observer";
 import Navbar from "./Navbar.vue";
 import RotatingText from "./RotatingText.vue";
 import ImageSection from "./Portrait.vue";
+import ProjectSection from "./ProjectSection.vue";
 
 // Import de la vidéo depuis le dossier assets
 import videoSource from "../assets/video/fleurs.mp4";
-import bgImage from "../assets/image/landscape.jpeg";
-import portrait from "../assets/image/Moi.png";
+import bgImage from "../assets/image/tree.jpg";
+import projectHUG from "../assets/image/mockup_hug.png"
+import projectEtoileBlanche from "../assets/image/etoile_blanche.png"
+import projectNoraa from "../assets/image/noraa.png"
+import projectVisualDon from "../assets/image/visualisation.png"
+import projectModterra from "../assets/image/modterra.png"
+
+let goToSection: ((id: string) => void) | null = null;
+
+const onNavigate = (id: string) => {
+  // Desktop : défilement horizontal géré par GSAP
+  if (goToSection) {
+    goToSection(id);
+    return;
+  }
+  // Mobile : défilement vertical natif
+  if (!id) window.scrollTo({ top: 0, behavior: "smooth" });
+  else document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+};
+
+// Décalage des blocs de texte (fraction de la largeur d'écran) : négatif = vers la gauche
+const BLOCK_SHIFT = -0.1;
 
 const base = import.meta.env.BASE_URL;
 
@@ -24,7 +45,24 @@ interface TextSlide {
   line: string;
 }
 
-const slides: TextSlide[] = [{ id: 1, line: "Léa Häberli" }];
+const projects = [
+  { id: "hug",   image: projectHUG,           numberColor: "#39803C", /* ... */ },
+  { id: "etoile", image: projectEtoileBlanche, numberColor: "#FFA0A0", /* ... */ },
+  { id: "noraa", image: projectNoraa,          numberColor: "#70BBE6", /* ... */ },
+  { id: "visu",  image: projectVisualDon,     numberColor: "#94E998", /* ... */ },
+  { id: "shop",  image: projectModterra,      numberColor: "#F2A900", /* ... */ },
+];
+
+// Distance parcourue par la colonne pendant le passage d'une section (en hauteurs d'écran)
+const NUMBER_SHIFT = 1.2;
+
+// Décalage des mots (fraction de la largeur d'écran), atteint quand la 1re section a quitté l'écran
+const WORD_SHIFT = 0.08;
+const MES_SHIFT = -0.2;
+
+const angle = ref(-2.5) // en degrés : négatif = vers le haut (sens anti-horaire), positif = vers le bas
+
+const slides: TextSlide[] = [{ id: 1, line: "Häberli" }];
 
 /* --- Dimensions réactives pour positionner le texte du clipPath en pixels --- */
 const vw = ref(window.innerWidth);
@@ -36,11 +74,13 @@ const boxH = computed(() => (isDesktop.value ? vh.value : vh.value * 0.45));
 
 const fontSize = computed(() =>
   isDesktop.value
-    ? vh.value * 0.47
+    ? vh.value * 0.75
     : Math.min(vw.value * 0.32, boxH.value * 0.42),
 );
-const padBottom = computed(() => boxH.value * -0.45);
-const textX = computed(() => vw.value * -0.01);
+// La rotation se fait autour du coin bas-gauche du texte, donc il reste ancré en bas
+const rotation = computed(() => `rotate(${angle.value} ${textX.value} ${y2.value})`)
+const padBottom = computed(() => boxH.value * -0.88);
+const textX = computed(() => vw.value * -0.04);
 const y2 = computed(() => boxH.value - padBottom.value); // baseline de la ligne du bas
 const y1 = computed(() => y2.value - fontSize.value * 0.85); // baseline de la ligne du haut
 
@@ -59,59 +99,125 @@ onMounted(() => {
 
   // --- DESKTOP (≥ 1024px) : défilement horizontal ---
   mm.add("(min-width: 1024px)", () => {
-    document.body.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
 
-    const container = containerRef.value;
-    if (!container) return;
+  const container = containerRef.value;
+  if (!container) return;
 
-    // Les zones qui contiennent le texte (vidéo découpée)
-    const textBoxes = container.querySelectorAll<HTMLElement>(
-      ".video-mask-wrapper",
+  const textBoxes = container.querySelectorAll<HTMLElement>(".video-mask-wrapper");
+  const numberTracks = container.querySelectorAll<HTMLElement>(".title-section-numbers-track");
+  const blocks = container.querySelectorAll<HTMLElement>(".title-section-block");
+  const mes = container.querySelector<HTMLElement>(".title-section-line-1");
+  const mesSection = mes?.closest<HTMLElement>(".title-section") ?? null;
+  const words = container.querySelectorAll<HTMLElement>(".rotating-word");
+  const firstWord = words[0];
+  const lastWord = words[words.length - 1];
+
+  // 0 quand la section arrive par la droite, 1 quand elle a quitté l'écran par la gauche
+  const sectionProgress = (section: HTMLElement) => {
+    const sectionLeft =
+      section.getBoundingClientRect().left - container.getBoundingClientRect().left;
+    const leftOnScreen = sectionLeft + currentX;
+    return gsap.utils.clamp(
+      0,
+      1,
+      (window.innerWidth - leftOnScreen) / (window.innerWidth + section.offsetWidth),
     );
+  };
 
-    const observer = Observer.create({
-      target: window,
-      type: "wheel,touch,pointer",
-      wheelSpeed: -1,
-      onChange: (self) => {
-        const maxX = container.scrollWidth - window.innerWidth;
+  // Applique la position courante (currentX) à tous les éléments animés
+  const update = (duration = 0.8) => {
+    const maxX = container.scrollWidth - window.innerWidth;
+    const opts: gsap.TweenVars = { duration, ease: "power2.out", overwrite: "auto" };
 
-        // Garde ta ligne de calcul du delta telle qu'elle est (axe dominant du trackpad)
-        const delta =
-          Math.abs(self.deltaX) > Math.abs(self.deltaY)
-            ? self.deltaX
-            : self.deltaY;
+    gsap.to(container, { x: currentX, ...opts });
 
-        currentX = gsap.utils.clamp(-maxX, 0, currentX + delta);
+    const progress = maxX > 0 ? -currentX / maxX : 0;
+    gsap.to(textBoxes, { x: -progress * window.innerWidth * TEXT_SHIFT, ...opts });
 
-        gsap.to(container, {
-          x: currentX,
-          duration: 0.8,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
+    const intro = gsap.utils.clamp(0, 1, -currentX / window.innerWidth);
+    const shift = intro * window.innerWidth * WORD_SHIFT;
+    if (firstWord) gsap.to(firstWord, { x: shift, ...opts });
+    if (lastWord && lastWord !== firstWord) gsap.to(lastWord, { x: -shift, ...opts });
 
-        // Avancement du scroll : 0 au début, 1 à la fin
-        const progress = maxX > 0 ? -currentX / maxX : 0;
+    if (mes && mesSection) {
+      gsap.to(mes, {
+        x: sectionProgress(mesSection) * window.innerWidth * MES_SHIFT,
+        ...opts,
+      });
+    }
 
-        // Le texte part un peu plus à gauche, avec la même durée et la même courbe
-        gsap.to(textBoxes, {
-          x: -progress * window.innerWidth * TEXT_SHIFT,
-          duration: 0.8,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      },
+    numberTracks.forEach((track) => {
+      const section = track.closest<HTMLElement>(".title-section");
+      if (!section) return;
+      gsap.to(track, {
+        y: -sectionProgress(section) * window.innerHeight * NUMBER_SHIFT,
+        ...opts,
+      });
     });
 
-    return () => {
-      document.body.style.overflow = "";
-      observer.kill();
-      gsap.set(container, { clearProps: "all" });
-      gsap.set(textBoxes, { clearProps: "transform" });
-      currentX = 0;
-    };
+    blocks.forEach((block) => {
+      const section = block.closest<HTMLElement>(".title-section");
+      if (!section) return;
+      gsap.to(block, {
+        x: sectionProgress(section) * window.innerWidth * BLOCK_SHIFT,
+        ...opts,
+      });
+    });
+  };
+
+  // Clic dans le menu : on amène le bord gauche de la section au bord gauche de l'écran
+  goToSection = (id: string) => {
+    const maxX = container.scrollWidth - window.innerWidth;
+    let target = 0; // id vide : retour au début
+
+    if (id) {
+      const section = container.querySelector<HTMLElement>(`#${CSS.escape(id)}`);
+      if (!section) return;
+      const left =
+        section.getBoundingClientRect().left - container.getBoundingClientRect().left;
+      target = -left;
+    }
+
+    currentX = gsap.utils.clamp(-maxX, 0, target);
+    update(1.2); // un peu plus lent qu'un scroll à la molette
+  };
+
+  // Empêche le navigateur d'interpréter le geste comme "page précédente / suivante"
+  const blockNativeWheel = (e: WheelEvent) => {
+    if (e.ctrlKey) return; // laisse passer le zoom
+    e.preventDefault();
+  };
+  window.addEventListener("wheel", blockNativeWheel, { passive: false });
+
+  const observer = Observer.create({
+    target: window,
+    type: "wheel,touch,pointer",
+    wheelSpeed: -1,
+    onChange: (self) => {
+      const maxX = container.scrollWidth - window.innerWidth;
+      const delta =
+        Math.abs(self.deltaX) > Math.abs(self.deltaY) ? self.deltaX : self.deltaY;
+
+      currentX = gsap.utils.clamp(-maxX, 0, currentX + delta);
+      update();
+    },
   });
+
+  return () => {
+    goToSection = null;
+    window.removeEventListener("wheel", blockNativeWheel);
+    document.body.style.overflow = "";
+    observer.kill();
+    gsap.set(container, { clearProps: "all" });
+    gsap.set(textBoxes, { clearProps: "transform" });
+    gsap.set([firstWord, lastWord].filter(Boolean), { clearProps: "transform" });
+    if (mes) gsap.set(mes, { clearProps: "transform" });
+    gsap.set(numberTracks, { clearProps: "transform" });
+    gsap.set(blocks, { clearProps: "transform" });
+    currentX = 0;
+  };
+});
 
   // --- MOBILE (< 1024px) : Scroll vertical naturel ---
   mm.add("(max-width: 1023px)", () => {
@@ -128,7 +234,7 @@ onUnmounted(() => {
 
 <template>
   <div class="viewport-wrapper">
-    <Navbar />
+    <Navbar @navigate="onNavigate" />
     <!-- SVG global contenant la définition du masque pour chaque slide -->
     <svg class="svg-definitions" aria-hidden="true">
       <defs>
@@ -142,6 +248,7 @@ onUnmounted(() => {
             :x="textX"
             :y="y1"
             :font-size="fontSize"
+            :transform="rotation"
             style="font-family: var(--font-background)"
           >
             {{ slide.line }}
@@ -155,7 +262,7 @@ onUnmounted(() => {
       <div v-for="slide in slides" :key="slide.id" class="text-slide">
         <div class="video-mask-wrapper">
           <!-- La vidéo découpée par le texte -->
-          <video
+          <video v-if="isDesktop"
             class="clipped-video"
             :style="{
               clipPath: `url(#text-clip-${slide.id})`,
@@ -173,10 +280,72 @@ onUnmounted(() => {
         <RotatingText v-if="slide.id === 1" />
       </div>
 
+      <ProjectSection
+        id="projets"
+        number="1"
+        number-color="#70BBE6"
+        line1="Mes"
+        line2="Projets"
+        :image="projectHUG"
+        image-alt="Description de l'image"
+        skill="Marketing / Développement full-stack / Product Owner"
+        title="HUG"
+        text="Une plateforme web pour les HUG et le Centre de transfusion sanguine de Genève."
+        button="Voir le projet"
+      />
+
+      <ProjectSection
+        number="2"
+        number-color="#FFA0A0"
+        :image="projectEtoileBlanche"
+        image-alt="Description de l'image"
+        skill="Marketing / Communication"
+        title="Etoile Blanche"
+        text="Renforcement de l’image de l'Étoile Blanche, restaurant et bar dansant au cœur de Lausanne. "
+        button="Voir le projet"
+      />
+
+      <ProjectSection
+        number="3"
+        number-color="#94E998"
+        :image="projectNoraa"
+        image-alt="Description de l'image"
+        skill="Design UX / Design UI"
+        title="Noraa"
+        text="Une plateforme web pour les HUG et le Centre de transfusion sanguine de Genève."
+        button="Voir le projet"
+      />
+
+      <ProjectSection
+        number="4"
+        number-color="#70BBE6"
+        data-nav-theme="dark"
+        :image="projectVisualDon"
+        image-alt="Description de l'image"
+        skill="Developpement full-stack"
+        title="Visualisation des données"
+        text="Une plateforme web pour les HUG et le Centre de transfusion sanguine de Genève."
+        button="Voir le projet"
+      />
+
+      <ProjectSection
+        number="5"
+        number-color="#FFA0A0"
+        :image="projectModterra"
+        image-alt="Description de l'image"
+        skill="Marketing / Communication"
+        title="E-commerce"
+        text="Conception et mise en ligne d’une boutique fictive de bijoux en céramique faits main."
+        button="Voir le projet"
+      />
+
       <ImageSection
+        id="portrait"
         :background="bgImage"
-        :image="portrait"
         image-alt="Portrait de Léa Häberli"
+        email="lea.haberli02@gmail.com"
+        linkedin="léa häberli"
+        linkedin-url="https://www.linkedin.com/in/l%C3%A9a-h%C3%A4berli-1a3418307/"
         title="Léa Häberli"
         text="Etudiante en Ingénierie des médias à la HEIG-VD, à Yverdon-les-Bains. J'aime les projets qui mélangent le design, le développement web et la stratégie marketing."
         text2="Au fil de mes études, jai conçu des applications web, travaillé en équipe agile et établir des stratégies de communication pour de vrais mandants."
@@ -184,6 +353,7 @@ onUnmounted(() => {
         :cv-url="`${base}CV.pdf`"
         cv-filename="CV.pdf"
       />
+
     </div>
   </div>
 </template>
@@ -269,6 +439,34 @@ onUnmounted(() => {
   .video-mask-wrapper {
     width: var(--text-w);
     height: 100vh; /* doit correspondre à boxH (vh * 1) */
+  }
+}
+
+@media (max-width: 1023px) {
+  .viewport-wrapper {
+    width: 100%;
+    height: auto;          /* le contenu peut maintenant dépasser et défiler */
+    overflow: visible;
+  }
+
+  .horizontal-container {
+    gap: 0;
+    padding: 0;
+  }
+
+  /* Accueil : nom + mots, centrés dans le premier écran */
+  .text-slide {
+    min-height: 100vh;
+    min-height: 100svh;    /* tient compte de la barre d'adresse mobile */
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 6rem 6vw 3rem;
+  }
+
+  .video-mask-wrapper {
+    display: none;
   }
 }
 </style>

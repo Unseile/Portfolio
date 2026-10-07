@@ -1,5 +1,4 @@
 /* Importation des fichiers de configuration */
-@import './colors.css';
 @import './fonts.css';
 
 /* --- REGLES GLOBALES DU VIEWPORT --- */
@@ -14,6 +13,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  overscroll-behavior-x: none;
   background-color: #ffffff;
   overflow-x: hidden; /* Supprime le scroll horizontal natif */
   font-synthesis: none;   /* le navigateur n'invente plus de faux gras ni de faux italique */
@@ -25,4 +25,24 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+}
+
+.title-section-button {
+  appearance: none;            /* retire l'apparence native du système */
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  font: inherit;               /* hérite de la police, de la taille et de la graisse */
+  color: inherit;
+  cursor: pointer;
+}
+
+@media (max-width: 1023px) {
+  html,
+  body,
+  #app {
+    height: auto;          /* sans ça, le <body> devient un défileur à part et le scroll se comporte mal */
+  }
 }
