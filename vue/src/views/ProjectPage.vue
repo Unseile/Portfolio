@@ -9,7 +9,7 @@ import { gsap } from 'gsap'
 
 type Block =
   | { kind: 'image'; image: ProjectImage }
-  | { kind: 'text'; text: TextBlock }
+  | { kind: 'text'; heading: string; text: TextBlock }
 
 const route = useRoute()
 const router = useRouter()
@@ -49,20 +49,35 @@ const nextProject = computed(() =>
   project.value ? getNextProject(project.value.slug) : undefined,
 )
 
-// L'ordre du ruban : image, 2 textes, image, 2 textes
+// Un bloc sans contenu est considéré comme absent
+const hasContent = (t?: TextBlock): t is TextBlock =>
+  !!t && !!(t.paragraphs?.length || t.bullets?.length || t.links?.length)
+
+
+// L'ordre du ruban : image, Description, Approche, [Mon rôle], image, Fonctionnalités, Défis
 const blocks = computed<Block[]>(() => {
   const p = project.value
   if (!p) return []
   const [img1, img2] = p.images
-  const [t1, t2, t3, t4] = p.texts
-  return [
+
+  const list: Block[] = [
     { kind: 'image', image: img1 },
-    { kind: 'text', text: t1 },
-    { kind: 'text', text: t2 },
-    { kind: 'image', image: img2 },
-    { kind: 'text', text: t3 },
-    { kind: 'text', text: t4 },
+    { kind: 'text', heading: 'Description', text: p.description },
+    { kind: 'text', heading: 'Approche', text: p.approach },
   ]
+
+  // « Mon rôle » est facultatif
+  if (hasContent(p.role)) {
+    list.push({ kind: 'text', heading: 'Mon rôle', text: p.role })
+  }
+
+  list.push(
+    { kind: 'image', image: img2 },
+    { kind: 'text', heading: 'Fonctionnalités', text: p.features },
+    { kind: 'text', heading: 'Défis et apprentissage', text: p.challenges },
+  )
+
+  return list
 })
 
 // Le menu ramène à l'accueil, sur la section demandée
@@ -109,7 +124,7 @@ watchEffect(() => {
         </figure>
 
         <section v-else class="pp-text">
-          <h2 v-if="block.text.heading" class="pp-text-heading">{{ block.text.heading }}</h2>
+          <h2 class="pp-text-heading">{{ block.heading }}</h2>
 
           <div v-if="block.text.paragraphs?.length" class="pp-text-body">
             <p v-for="(paragraph, j) in block.text.paragraphs" :key="j">{{ paragraph }}</p>
@@ -212,14 +227,14 @@ watchEffect(() => {
   margin-bottom: 1.5rem;
   font-family: var(--font-title);
   font-weight: normal;
-  font-size: clamp(2rem, 2.6vw, 2.8rem);
+  font-size: clamp(2.625rem, 2.6vw, 2.8rem);
   line-height: 1.1;
 }
 
 .pp-text-body,
 .pp-bullets {
   font-family: var(--font-project-body);
-  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  font-size: clamp(1.125rem, 1.25vw, 1.2rem);
   line-height: 1.65;
 }
 
