@@ -10,23 +10,21 @@ import ProjectSection from "./ProjectSection.vue";
 // Import de la vidéo depuis le dossier assets
 import videoSource from "../assets/video/fleurs.mp4";
 import bgImage from "../assets/image/tree.jpg";
-import projectHUG from "../assets/image/mockup_hug.png"
-import projectEtoileBlanche from "../assets/image/etoile_blanche.png"
-import projectNoraa from "../assets/image/noraa.png"
-import projectVisualDon from "../assets/image/visualisation.png"
-import projectModterra from "../assets/image/modterra.png"
+import { useRoute } from "vue-router";
+import { projects } from "../data/projects.ts";
 
-let goToSection: ((id: string) => void) | null = null;
+const route = useRoute();
 
-const onNavigate = (id: string) => {
-  // Desktop : défilement horizontal géré par GSAP
+let goToSection: ((id: string, duration?: number) => void) | null = null;
+
+const onNavigate = (id: string, duration = 1.2) => {
   if (goToSection) {
-    goToSection(id);
+    goToSection(id, duration);
     return;
   }
-  // Mobile : défilement vertical natif
-  if (!id) window.scrollTo({ top: 0, behavior: "smooth" });
-  else document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const behavior = duration ? "smooth" : "auto";
+  if (!id) window.scrollTo({ top: 0, behavior });
+  else document.getElementById(id)?.scrollIntoView({ behavior });
 };
 
 // Décalage des blocs de texte (fraction de la largeur d'écran) : négatif = vers la gauche
@@ -44,14 +42,6 @@ interface TextSlide {
   id: number;
   line: string;
 }
-
-const projects = [
-  { id: "hug",   image: projectHUG,           numberColor: "#39803C", /* ... */ },
-  { id: "etoile", image: projectEtoileBlanche, numberColor: "#FFA0A0", /* ... */ },
-  { id: "noraa", image: projectNoraa,          numberColor: "#70BBE6", /* ... */ },
-  { id: "visu",  image: projectVisualDon,     numberColor: "#94E998", /* ... */ },
-  { id: "shop",  image: projectModterra,      numberColor: "#F2A900", /* ... */ },
-];
 
 // Distance parcourue par la colonne pendant le passage d'une section (en hauteurs d'écran)
 const NUMBER_SHIFT = 1.2;
@@ -167,7 +157,7 @@ onMounted(() => {
   };
 
   // Clic dans le menu : on amène le bord gauche de la section au bord gauche de l'écran
-  goToSection = (id: string) => {
+  goToSection = (id: string, duration = 1.2) => {
     const maxX = container.scrollWidth - window.innerWidth;
     let target = 0; // id vide : retour au début
 
@@ -180,7 +170,7 @@ onMounted(() => {
     }
 
     currentX = gsap.utils.clamp(-maxX, 0, target);
-    update(1.2); // un peu plus lent qu'un scroll à la molette
+    update(duration);
   };
 
   // Empêche le navigateur d'interpréter le geste comme "page précédente / suivante"
@@ -203,6 +193,10 @@ onMounted(() => {
       update();
     },
   });
+
+  if (route.hash) {
+    requestAnimationFrame(() => onNavigate(route.hash.slice(1), 0));
+  }
 
   return () => {
     goToSection = null;
@@ -281,62 +275,20 @@ onUnmounted(() => {
       </div>
 
       <ProjectSection
-        id="projets"
-        number="1"
-        number-color="#70BBE6"
-        line1="Mes"
-        line2="Projets"
-        :image="projectHUG"
-        image-alt="Description de l'image"
-        skill="Marketing / Développement full-stack / Product Owner"
-        title="HUG"
-        text="Une plateforme web pour les HUG et le Centre de transfusion sanguine de Genève."
+        v-for="(p, i) in projects"
+        :key="p.slug"
+        :id="i === 0 ? 'projets' : undefined"
+        :number="i + 1"
+        :number-color="p.color"
+        :line1="i === 0 ? 'Mes' : undefined"
+        :line2="i === 0 ? 'Projets' : undefined"
+        :image="p.cover"
+        :image-alt="p.title"
+        :skill="p.skills.join(' / ')"
+        :title="p.title"
+        :text="p.summary"
         button="Voir le projet"
-      />
-
-      <ProjectSection
-        number="2"
-        number-color="#FFA0A0"
-        :image="projectEtoileBlanche"
-        image-alt="Description de l'image"
-        skill="Marketing / Communication"
-        title="Etoile Blanche"
-        text="Renforcement de l’image de l'Étoile Blanche, restaurant et bar dansant au cœur de Lausanne. "
-        button="Voir le projet"
-      />
-
-      <ProjectSection
-        number="3"
-        number-color="#94E998"
-        :image="projectNoraa"
-        image-alt="Description de l'image"
-        skill="Design UX / Design UI"
-        title="Noraa"
-        text="Une plateforme web pour les HUG et le Centre de transfusion sanguine de Genève."
-        button="Voir le projet"
-      />
-
-      <ProjectSection
-        number="4"
-        number-color="#70BBE6"
-        data-nav-theme="dark"
-        :image="projectVisualDon"
-        image-alt="Description de l'image"
-        skill="Developpement full-stack"
-        title="Visualisation des données"
-        text="Une plateforme web pour les HUG et le Centre de transfusion sanguine de Genève."
-        button="Voir le projet"
-      />
-
-      <ProjectSection
-        number="5"
-        number-color="#FFA0A0"
-        :image="projectModterra"
-        image-alt="Description de l'image"
-        skill="Marketing / Communication"
-        title="E-commerce"
-        text="Conception et mise en ligne d’une boutique fictive de bijoux en céramique faits main."
-        button="Voir le projet"
+        :to="`/projets/${p.slug}`"
       />
 
       <ImageSection

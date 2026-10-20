@@ -13,6 +13,7 @@ const props = withDefaults(
     button: string;
     number?: number | string;   // numéro du projet
     numberColor?: string;
+    to?: string; 
   }>(),
   {
     imageAlt: "",
@@ -50,7 +51,8 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
       <p class="title-section-skill">{{ skill }}</p>
       <p class="title-section-project">{{ title }}</p>
       <p class="title-section-text">{{ text }}</p>
-      <button class="title-section-button">{{ button }}</button>
+      <RouterLink v-if="to" :to="to" class="title-section-button">{{ button }}</RouterLink>
+      <button v-else class="title-section-button">{{ button }}</button>
     </div>
   </section>
 </template>
@@ -116,6 +118,9 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 }
 
 .title-section-button {
+  display: inline-block;
+  text-decoration: none;
+  color: inherit;
   font-family: var(--font-project-body);
   align-self: flex-start; /* sans ça, le bouton s'étire sur toute la largeur du bloc */
   margin-top: 0.5rem; /* un peu plus d'air avant le bouton */

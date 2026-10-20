@@ -115,11 +115,17 @@ withDefaults(
 
 .image-section-link {
   display: inline-flex;
+  cursor: pointer;
   align-items: center;
   gap: 0.5rem;                /* espace entre l'icône et le texte */
   color: #111111;
-  text-decoration: none;
-  transition: color 0.25s ease;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;   /* distance entre le texte et le trait */
+  text-decoration-thickness: 1px;  /* épaisseur du trait */
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
 }
 
 .image-section-link svg {
@@ -130,11 +136,11 @@ withDefaults(
 
 .image-section-link:hover {
   color: #39803c;
+  transform: translateY(-2px);
 }
 
 .image-section-link:hover span {
-  text-decoration: underline;
-  text-underline-offset: 0.25em;
+  text-decoration-thickness: 2px;
 }
 
 .image-section-link:focus-visible {
@@ -231,7 +237,7 @@ withDefaults(
 }
 
 /* --- MOBILE : l'image passe au-dessus du texte --- */
-@@media (max-width: 1023px) {
+@media (max-width: 1023px) {
   .image-section {
     min-height: 100vh;
     min-height: 100svh;
@@ -250,7 +256,6 @@ withDefaults(
   .image-section-title {
     font-size: 2.2rem;
   }
-
   /* E-mail et LinkedIn l'un sous l'autre (si tu as ajouté les icônes cliquables) */
   .image-section-top {
     flex-direction: column;
@@ -266,7 +271,8 @@ withDefaults(
     flex: 1 1 auto;            /* les deux boutons du CV se partagent la largeur */
     text-align: center;
   }
-}media (max-width: 1023px) {
+}
+@media (max-width: 1023px) {
   .image-section {
     padding: 5rem 5vw 3rem;
     justify-content: center;
