@@ -11,28 +11,38 @@ const props = withDefaults(
     title: string;
     text: string;
     button: string;
-    number?: number | string;   // numéro du projet
+    number?: number | string; // numéro du projet
     numberColor?: string;
-    to?: string; 
+    to?: string;
   }>(),
   {
     imageAlt: "",
   },
 );
 
-const REPEAT = 10;   // nombre de fois où le numéro est écrit dans la colonne
+const REPEAT = 10; // nombre de fois où le numéro est écrit dans la colonne
 
 // Une section sans titre est une "suite" : on la rapproche de la précédente
 const hasTitle = computed(() => !!(props.line1 || props.line2));
 </script>
 
 <template>
-  <section class="title-section" :class="{ 'is-followup': !hasTitle }" :style="numberColor ? { '--num-color': numberColor } : undefined">
-      <div v-if="number !== undefined" class="title-section-numbers" aria-hidden="true">
-        <div class="title-section-numbers-track">
-          <span v-for="n in REPEAT" :key="n" class="title-section-number">{{ number }}</span>
-        </div>
+  <section
+    class="title-section"
+    :class="{ 'is-followup': !hasTitle }"
+    :style="numberColor ? { '--num-color': numberColor } : undefined"
+  >
+    <div
+      v-if="number !== undefined"
+      class="title-section-numbers"
+      aria-hidden="true"
+    >
+      <div class="title-section-numbers-track">
+        <span v-for="n in REPEAT" :key="n" class="title-section-number">{{
+          number
+        }}</span>
       </div>
+    </div>
 
     <img
       class="title-section-image"
@@ -47,20 +57,21 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
       <span>{{ line2 }}</span>
     </h2>
 
-    <div class="title-section-block">
-      <p class="title-section-skill">{{ skill }}</p>
-      <p class="title-section-project">{{ title }}</p>
-      <p class="title-section-text">{{ text }}</p>
-      <RouterLink v-if="to" :to="to" class="title-section-button">{{ button }}</RouterLink>
-      <button v-else class="title-section-button">{{ button }}</button>
-    </div>
+    <RouterLink v-if="to" :to="to" class="title-section-button">
+      <div class="title-section-block">
+        <p class="title-section-skill">{{ skill }}</p>
+        <p class="title-section-project">{{ title }}</p>
+        <p class="title-section-text">{{ text }}</p>
+        <span>{{ button }}</span>
+      </div>
+    </RouterLink>
   </section>
 </template>
 
 <style scoped>
 .title-section {
-  --num-gap: 4vw;                                /* espace entre la colonne et l'image */
-  --num-size: clamp(8rem, 26vh, 18rem);          /* taille des numéros */
+  --num-gap: 4vw; /* espace entre la colonne et l'image */
+  --num-size: clamp(8rem, 26vh, 18rem); /* taille des numéros */
   --image-w: 42vw; /* largeur de l'image */
   --block-w: min(30vw, 28rem); /* largeur du bloc */
   --margin-r: -9vw; /* négatif : le bloc dépasse du bord droit de l'écran */
@@ -68,8 +79,8 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   --followup-pull: 25vw; /* de combien les sections suivantes sont rapprochées */
   --lead-space: 12vw;
   --image-w: 40rem;
-  --num-color: #111111;      /* couleur par défaut, remplacée par la prop numberColor */
-  --num-opacity: 0.5;       /* transparence : c'est de l'arrière-plan */
+  --num-color: #111111; /* couleur par défaut, remplacée par la prop numberColor */
+  --num-opacity: 0.5; /* transparence : c'est de l'arrière-plan */
 
   /* L'image se place toute seule à partir du bloc */
   --image-offset: calc(var(--margin-r) + var(--block-w) - var(--overlap));
@@ -135,7 +146,7 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   position: absolute;
   top: 50%; /* remplace bottom: 35vh */
   right: var(--margin-r);
-  translate: 0 -50%;          /* remplace transform: translateY(-50%) */
+  translate: 0 -50%; /* remplace transform: translateY(-50%) */
   z-index: 2;
   width: var(--block-w);
   padding: 2.5rem;
@@ -175,14 +186,28 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   position: absolute;
   top: 0;
   bottom: 0;
-  right: calc(var(--image-offset) + var(--image-w) + var(--num-gap));   /* remplace left: 30vw */
+  right: calc(
+    var(--image-offset) + var(--image-w) + var(--num-gap)
+  ); /* remplace left: 30vw */
   width: max-content;
   padding: 0 1vw;
   overflow: hidden;
   z-index: 0;
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 15%, #000 85%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 15%, #000 85%, transparent);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 15%,
+    #000 85%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 15%,
+    #000 85%,
+    transparent
+  );
   opacity: var(--num-opacity);
 }
 
@@ -231,7 +256,7 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 
   .title-section-image {
     position: static;
-    order: 2;                 /* l'image passe sous le titre */
+    order: 2; /* l'image passe sous le titre */
     width: 100%;
     height: 38vh;
     border-radius: 1.5rem;
@@ -244,7 +269,7 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
     translate: none;
     align-self: flex-end;
     width: 90%;
-    margin-top: -3rem;        /* la carte chevauche le bas de l'image */
+    margin-top: -3rem; /* la carte chevauche le bas de l'image */
     padding: 1.5rem;
     box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.12);
   }
