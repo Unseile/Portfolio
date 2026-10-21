@@ -549,7 +549,7 @@ watchEffect(() => {
 /* --- DESKTOP : ruban horizontal --- */
 @media (min-width: 1024px) {
   .project-page {
-    --intro-pad: 27vw; /* décalage du titre depuis la gauche */
+    --intro-pad: 20vw; /* décalage du titre depuis la gauche */
     --image-w: 42vw; /* largeur des images */
     --text-w: 40vw; /* largeur des zones de texte */
     --gap: 8vw; /* espace entre deux éléments du ruban */
