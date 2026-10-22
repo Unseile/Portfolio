@@ -315,7 +315,7 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   .title-section-title {
     position: static;
     transform: none;
-    margin-bottom: 1.5rem;
+    margin-bottom: 4rem;
     font-size: clamp(3.5rem, 18vw, 6rem);
     text-align: center;
   }
@@ -325,7 +325,6 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
     order: 2; /* l'image passe sous le titre */
     width: 100%;
     height: 38vh;
-    border-radius: 1.5rem;
   }
 
   .title-section-block {
@@ -334,10 +333,15 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
     transform: none;
     translate: none;
     align-self: flex-end;
-    width: 90%;
+    width: 100%;
     margin-top: -3rem; /* la carte chevauche le bas de l'image */
     padding: 1.5rem;
     box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.12);
+  }
+
+  .title-section-project {
+    margin-bottom: -1rem;
+    line-height: 2rem;
   }
 }
 </style>

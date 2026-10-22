@@ -50,7 +50,7 @@ const NUMBER_SHIFT = 1.2;
 const WORD_SHIFT = 0.08;
 const MES_SHIFT = -0.2;
 
-const angle = ref(-2.5) // en degrés : négatif = vers le haut (sens anti-horaire), positif = vers le bas
+const angle = ref(-2.5); // en degrés : négatif = vers le haut (sens anti-horaire), positif = vers le bas
 
 const slides: TextSlide[] = [{ id: 1, line: "Häberli" }];
 
@@ -62,17 +62,38 @@ const isDesktop = computed(() => vw.value >= 1024);
 // Hauteur de la zone vidéo : 100vh sur desktop, 45vh sur mobile (doit correspondre au CSS)
 const boxH = computed(() => (isDesktop.value ? vh.value : vh.value * 0.45));
 
-const fontSize = computed(() =>
-  isDesktop.value
-    ? vh.value * 0.75
-    : Math.min(vw.value * 0.32, boxH.value * 0.42),
-);
-// La rotation se fait autour du coin bas-gauche du texte, donc il reste ancré en bas
-const rotation = computed(() => `rotate(${angle.value} ${textX.value} ${y2.value})`)
-const padBottom = computed(() => boxH.value * -0.88);
+// Largeur du nom pour une police de 1 px, mesurée avec la vraie police (Modak)
+const textRatio = ref(3.4);
+
+const measureText = () => {
+  const family =
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--font-background")
+      .trim() || "cursive";
+  const ctx = document.createElement("canvas").getContext("2d");
+  if (!ctx) return;
+  ctx.font = `100px ${family}`;
+  const width = ctx.measureText(slides[0].line).width;
+  if (width > 0) textRatio.value = width / 100;
+};
+
+// Taille du nom : 75 % de la hauteur d'écran, mais jamais plus large que la zone de la vidéo
+const fontSize = computed(() => {
+  if (!isDesktop.value) return Math.min(vw.value * 0.32, boxH.value * 0.42);
+  const byHeight = vh.value * 0.75;
+  const byWidth = (vw.value * 1.17) / textRatio.value;
+  return Math.min(byHeight, byWidth);
+});
+
+// Le nom dépasse du bas de l'écran : plus ce nombre est petit, plus on voit les lettres
+const NAME_BLEED = 0.323;
+
 const textX = computed(() => vw.value * -0.04);
-const y2 = computed(() => boxH.value - padBottom.value); // baseline de la ligne du bas
-const y1 = computed(() => y2.value - fontSize.value * 0.85); // baseline de la ligne du haut
+const y1 = computed(() => boxH.value + fontSize.value * NAME_BLEED); // ligne de base du texte
+const y2 = computed(() => y1.value + fontSize.value * 0.85); // pivot de la rotation
+const rotation = computed(
+  () => `rotate(${angle.value} ${textX.value} ${y2.value})`,
+);
 
 const onResize = () => {
   vw.value = window.innerWidth;
@@ -81,6 +102,11 @@ const onResize = () => {
 
 onMounted(() => {
   window.addEventListener("resize", onResize);
+
+  // Mesure du nom une fois la police chargée
+  measureText();
+  document.fonts?.load("100px 'Modak-Regular'").then(measureText);
+
   mm = gsap.matchMedia();
 
   // --- DESKTOP (≥ 1024px) : Défilement horizontal unique ---
@@ -89,129 +115,152 @@ onMounted(() => {
 
   // --- DESKTOP (≥ 1024px) : défilement horizontal ---
   mm.add("(min-width: 1024px)", () => {
-  document.body.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
 
-  const container = containerRef.value;
-  if (!container) return;
+    const container = containerRef.value;
+    if (!container) return;
 
-  const textBoxes = container.querySelectorAll<HTMLElement>(".video-mask-wrapper");
-  const numberTracks = container.querySelectorAll<HTMLElement>(".title-section-numbers-track");
-  const blocks = container.querySelectorAll<HTMLElement>(".title-section-block");
-  const mes = container.querySelector<HTMLElement>(".title-section-line-1");
-  const mesSection = mes?.closest<HTMLElement>(".title-section") ?? null;
-  const words = container.querySelectorAll<HTMLElement>(".rotating-word");
-  const firstWord = words[0];
-  const lastWord = words[words.length - 1];
-
-  // 0 quand la section arrive par la droite, 1 quand elle a quitté l'écran par la gauche
-  const sectionProgress = (section: HTMLElement) => {
-    const sectionLeft =
-      section.getBoundingClientRect().left - container.getBoundingClientRect().left;
-    const leftOnScreen = sectionLeft + currentX;
-    return gsap.utils.clamp(
-      0,
-      1,
-      (window.innerWidth - leftOnScreen) / (window.innerWidth + section.offsetWidth),
+    const textBoxes = container.querySelectorAll<HTMLElement>(
+      ".video-mask-wrapper",
     );
-  };
+    const numberTracks = container.querySelectorAll<HTMLElement>(
+      ".title-section-numbers-track",
+    );
+    const blocks = container.querySelectorAll<HTMLElement>(
+      ".title-section-block",
+    );
+    const mes = container.querySelector<HTMLElement>(".title-section-line-1");
+    const mesSection = mes?.closest<HTMLElement>(".title-section") ?? null;
+    const words = container.querySelectorAll<HTMLElement>(".rotating-word");
+    const firstWord = words[0];
+    const lastWord = words[words.length - 1];
 
-  // Applique la position courante (currentX) à tous les éléments animés
-  const update = (duration = 0.8) => {
-    const maxX = container.scrollWidth - window.innerWidth;
-    const opts: gsap.TweenVars = { duration, ease: "power2.out", overwrite: "auto" };
+    // 0 quand la section arrive par la droite, 1 quand elle a quitté l'écran par la gauche
+    const sectionProgress = (section: HTMLElement) => {
+      const sectionLeft =
+        section.getBoundingClientRect().left -
+        container.getBoundingClientRect().left;
+      const leftOnScreen = sectionLeft + currentX;
+      return gsap.utils.clamp(
+        0,
+        1,
+        (window.innerWidth - leftOnScreen) /
+          (window.innerWidth + section.offsetWidth),
+      );
+    };
 
-    gsap.to(container, { x: currentX, ...opts });
-
-    const progress = maxX > 0 ? -currentX / maxX : 0;
-    gsap.to(textBoxes, { x: -progress * window.innerWidth * TEXT_SHIFT, ...opts });
-
-    const intro = gsap.utils.clamp(0, 1, -currentX / window.innerWidth);
-    const shift = intro * window.innerWidth * WORD_SHIFT;
-    if (firstWord) gsap.to(firstWord, { x: shift, ...opts });
-    if (lastWord && lastWord !== firstWord) gsap.to(lastWord, { x: -shift, ...opts });
-
-    if (mes && mesSection) {
-      gsap.to(mes, {
-        x: sectionProgress(mesSection) * window.innerWidth * MES_SHIFT,
-        ...opts,
-      });
-    }
-
-    numberTracks.forEach((track) => {
-      const section = track.closest<HTMLElement>(".title-section");
-      if (!section) return;
-      gsap.to(track, {
-        y: -sectionProgress(section) * window.innerHeight * NUMBER_SHIFT,
-        ...opts,
-      });
-    });
-
-    blocks.forEach((block) => {
-      const section = block.closest<HTMLElement>(".title-section");
-      if (!section) return;
-      gsap.to(block, {
-        x: sectionProgress(section) * window.innerWidth * BLOCK_SHIFT,
-        ...opts,
-      });
-    });
-  };
-
-  // Clic dans le menu : on amène le bord gauche de la section au bord gauche de l'écran
-  goToSection = (id: string, duration = 1.2) => {
-    const maxX = container.scrollWidth - window.innerWidth;
-    let target = 0; // id vide : retour au début
-
-    if (id) {
-      const section = container.querySelector<HTMLElement>(`#${CSS.escape(id)}`);
-      if (!section) return;
-      const left =
-        section.getBoundingClientRect().left - container.getBoundingClientRect().left;
-      target = -left;
-    }
-
-    currentX = gsap.utils.clamp(-maxX, 0, target);
-    update(duration);
-  };
-
-  // Empêche le navigateur d'interpréter le geste comme "page précédente / suivante"
-  const blockNativeWheel = (e: WheelEvent) => {
-    if (e.ctrlKey) return; // laisse passer le zoom
-    e.preventDefault();
-  };
-  window.addEventListener("wheel", blockNativeWheel, { passive: false });
-
-  const observer = Observer.create({
-    target: window,
-    type: "wheel,touch,pointer",
-    wheelSpeed: -1,
-    onChange: (self) => {
+    // Applique la position courante (currentX) à tous les éléments animés
+    const update = (duration = 0.8) => {
       const maxX = container.scrollWidth - window.innerWidth;
-      const delta =
-        Math.abs(self.deltaX) > Math.abs(self.deltaY) ? self.deltaX : self.deltaY;
+      const opts: gsap.TweenVars = {
+        duration,
+        ease: "power2.out",
+        overwrite: "auto",
+      };
 
-      currentX = gsap.utils.clamp(-maxX, 0, currentX + delta);
-      update();
-    },
+      gsap.to(container, { x: currentX, ...opts });
+
+      const progress = maxX > 0 ? -currentX / maxX : 0;
+      gsap.to(textBoxes, {
+        x: -progress * window.innerWidth * TEXT_SHIFT,
+        ...opts,
+      });
+
+      const intro = gsap.utils.clamp(0, 1, -currentX / window.innerWidth);
+      const shift = intro * window.innerWidth * WORD_SHIFT;
+      if (firstWord) gsap.to(firstWord, { x: shift, ...opts });
+      if (lastWord && lastWord !== firstWord)
+        gsap.to(lastWord, { x: -shift, ...opts });
+
+      if (mes && mesSection) {
+        gsap.to(mes, {
+          x: sectionProgress(mesSection) * window.innerWidth * MES_SHIFT,
+          ...opts,
+        });
+      }
+
+      numberTracks.forEach((track) => {
+        const section = track.closest<HTMLElement>(".title-section");
+        if (!section) return;
+        gsap.to(track, {
+          y: -sectionProgress(section) * window.innerHeight * NUMBER_SHIFT,
+          ...opts,
+        });
+      });
+
+      blocks.forEach((block) => {
+        const section = block.closest<HTMLElement>(".title-section");
+        if (!section) return;
+        gsap.to(block, {
+          x: sectionProgress(section) * window.innerWidth * BLOCK_SHIFT,
+          ...opts,
+        });
+      });
+    };
+
+    // Clic dans le menu : on amène le bord gauche de la section au bord gauche de l'écran
+    goToSection = (id: string, duration = 1.2) => {
+      const maxX = container.scrollWidth - window.innerWidth;
+      let target = 0; // id vide : retour au début
+
+      if (id) {
+        const section = container.querySelector<HTMLElement>(
+          `#${CSS.escape(id)}`,
+        );
+        if (!section) return;
+        const left =
+          section.getBoundingClientRect().left -
+          container.getBoundingClientRect().left;
+        target = -left;
+      }
+
+      currentX = gsap.utils.clamp(-maxX, 0, target);
+      update(duration);
+    };
+
+    // Empêche le navigateur d'interpréter le geste comme "page précédente / suivante"
+    const blockNativeWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) return; // laisse passer le zoom
+      e.preventDefault();
+    };
+    window.addEventListener("wheel", blockNativeWheel, { passive: false });
+
+    const observer = Observer.create({
+      target: window,
+      type: "wheel,touch,pointer",
+      wheelSpeed: -1,
+      onChange: (self) => {
+        const maxX = container.scrollWidth - window.innerWidth;
+        const delta =
+          Math.abs(self.deltaX) > Math.abs(self.deltaY)
+            ? self.deltaX
+            : self.deltaY;
+
+        currentX = gsap.utils.clamp(-maxX, 0, currentX + delta);
+        update();
+      },
+    });
+
+    if (route.hash) {
+      requestAnimationFrame(() => onNavigate(route.hash.slice(1), 0));
+    }
+
+    return () => {
+      goToSection = null;
+      window.removeEventListener("wheel", blockNativeWheel);
+      document.body.style.overflow = "";
+      observer.kill();
+      gsap.set(container, { clearProps: "all" });
+      gsap.set(textBoxes, { clearProps: "transform" });
+      gsap.set([firstWord, lastWord].filter(Boolean), {
+        clearProps: "transform",
+      });
+      if (mes) gsap.set(mes, { clearProps: "transform" });
+      gsap.set(numberTracks, { clearProps: "transform" });
+      gsap.set(blocks, { clearProps: "transform" });
+      currentX = 0;
+    };
   });
-
-  if (route.hash) {
-    requestAnimationFrame(() => onNavigate(route.hash.slice(1), 0));
-  }
-
-  return () => {
-    goToSection = null;
-    window.removeEventListener("wheel", blockNativeWheel);
-    document.body.style.overflow = "";
-    observer.kill();
-    gsap.set(container, { clearProps: "all" });
-    gsap.set(textBoxes, { clearProps: "transform" });
-    gsap.set([firstWord, lastWord].filter(Boolean), { clearProps: "transform" });
-    if (mes) gsap.set(mes, { clearProps: "transform" });
-    gsap.set(numberTracks, { clearProps: "transform" });
-    gsap.set(blocks, { clearProps: "transform" });
-    currentX = 0;
-  };
-});
 
   // --- MOBILE (< 1024px) : Scroll vertical naturel ---
   mm.add("(max-width: 1023px)", () => {
@@ -256,7 +305,8 @@ onUnmounted(() => {
       <div v-for="slide in slides" :key="slide.id" class="text-slide">
         <div class="video-mask-wrapper">
           <!-- La vidéo découpée par le texte -->
-          <video v-if="isDesktop"
+          <video
+            v-if="isDesktop"
             class="clipped-video"
             :style="{
               clipPath: `url(#text-clip-${slide.id})`,
@@ -270,6 +320,12 @@ onUnmounted(() => {
             <source :src="videoSource" type="video/mp4" />
           </video>
         </div>
+
+        <!-- Nom en texte : lu par les lecteurs d'écran, affiché seulement sur mobile et tablette -->
+        <h1 v-if="slide.id === 1" class="hero-name">
+          <span>Léa</span>
+          <span>Häberli</span>
+        </h1>
 
         <RotatingText v-if="slide.id === 1" />
       </div>
@@ -305,7 +361,6 @@ onUnmounted(() => {
         :cv-url="`${base}CV.pdf`"
         cv-filename="CV.pdf"
       />
-
     </div>
   </div>
 </template>
@@ -366,6 +421,18 @@ onUnmounted(() => {
   display: block;
 }
 
+.hero-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* --- DESKTOP (≥ 1024px) : défilement horizontal --- */
 @media (min-width: 1024px) {
   .viewport-wrapper {
@@ -397,7 +464,7 @@ onUnmounted(() => {
 @media (max-width: 1023px) {
   .viewport-wrapper {
     width: 100%;
-    height: auto;          /* le contenu peut maintenant dépasser et défiler */
+    height: auto;
     overflow: visible;
   }
 
@@ -406,10 +473,9 @@ onUnmounted(() => {
     padding: 0;
   }
 
-  /* Accueil : nom + mots, centrés dans le premier écran */
   .text-slide {
     min-height: 100vh;
-    min-height: 100svh;    /* tient compte de la barre d'adresse mobile */
+    min-height: 100svh;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
