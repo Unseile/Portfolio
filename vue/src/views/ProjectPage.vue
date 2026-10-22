@@ -10,6 +10,11 @@ import { formatText } from "../utils/formatText";
 import { getLinkKind } from "../utils/linkType";
 import type { ProjectLink } from "../data/projects";
 
+const longestWord = computed(() => {
+  const words = project.value?.title.split(/\s+/) ?? [];
+  return Math.max(4, ...words.map((w) => w.length));
+});
+
 type Block =
   | { kind: "image"; image: ProjectImage }
   | { kind: "text"; heading: string; text: TextBlock };
@@ -124,9 +129,11 @@ watchEffect(() => {
       <!-- 1. Titre, compétences, membres -->
       <header class="pp-intro">
         <div class="pp-intro-inner">
-          <h1 class="pp-title">{{ project.title }}</h1>
+          <h1 class="pp-title" :style="{ '--longest': longestWord }">
+            {{ project.title }}
+          </h1>
           <p class="pp-skills">{{ project.skills.join(" / ") }}</p>
-          
+
           <div
             v-if="logoGroup.length"
             class="pp-logos"
@@ -139,7 +146,7 @@ watchEffect(() => {
                   <img
                     :src="logo.src"
                     :alt="logo.name"
-                    loading="lazy"
+                    loading="eager"
                     decoding="async"
                   />
                   <span class="logo-name">{{ logo.name }}</span>
@@ -149,7 +156,12 @@ watchEffect(() => {
               <!-- Copie identique, nécessaire à la boucle : ignorée par les lecteurs d'écran -->
               <ul class="pp-logos-list" aria-hidden="true">
                 <li v-for="(logo, i) in logoGroup" :key="'copy-' + i">
-                  <img :src="logo.src" alt="" loading="lazy" decoding="async" />
+                  <img
+                    :src="logo.src"
+                    alt=""
+                    loading="eager"
+                    decoding="async"
+                  />
                   <span class="logo-name">{{ logo.name }}</span>
                 </li>
               </ul>
@@ -194,11 +206,7 @@ watchEffect(() => {
 
           <ul v-if="block.text.links?.length" class="pp-links">
             <li v-for="link in block.text.links" :key="link.label">
-              <a
-                :href="link.href"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a :href="link.href" target="_blank" rel="noopener noreferrer">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -251,6 +259,8 @@ watchEffect(() => {
 <style scoped>
 .project-page {
   --accent: #39803c;
+  --title-w: 88vw; /* largeur disponible pour le titre (mobile) */
+  --char-w: 0.62; /* largeur moyenne d'une lettre en em : monte si le titre déborde encore */
   color: #111111;
   background: #ffffff;
 }
@@ -259,8 +269,14 @@ watchEffect(() => {
 .pp-title {
   font-family: var(--font-chapter);
   font-weight: normal;
-  font-size: clamp(5rem, min(11vw, 22vh), 5rem);
+  /* Le plus grand possible (10rem max), mais le plus long mot tient toujours dans la largeur disponible */
+  font-size: clamp(
+    1.75rem,
+    min(22vh, calc(var(--title-w) / (var(--longest) * var(--char-w)))),
+    10rem
+  );
   line-height: 0.9;
+  overflow-wrap: anywhere; /* dernier recours : un mot trop long est coupé plutôt que de passer sous l'image */
 }
 
 .pp-skills {
@@ -401,8 +417,9 @@ watchEffect(() => {
   --logo-gap: 1.5rem; /* espace entre deux logos */
 
   margin-top: 2.5rem;
-  width: min(100%, 34rem);
+  width: min(100%, 40rem);
   overflow: hidden;
+  padding-bottom: 1.75rem;
   /* fondu sur les bords gauche et droit */
   -webkit-mask-image: linear-gradient(
     to right,
@@ -429,8 +446,10 @@ watchEffect(() => {
   ); /* vitesse constante, quel que soit le nombre */
 }
 
-.pp-logos:hover .pp-logos-track {
-  animation-play-state: paused; /* la bande s'arrête au survol */
+@media (hover: hover) {
+  .pp-logos:hover .pp-logos-track {
+    animation-play-state: paused;
+  }
 }
 
 .pp-logos-list {
@@ -442,6 +461,31 @@ watchEffect(() => {
     --logo-gap
   ); /* même écart entre la fin de la liste et sa copie */
   list-style: none;
+}
+
+.pp-logos-list li {
+  position: relative;
+}
+
+.pp-logos-list .logo-name {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0.4rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: #555555;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+@media (hover: hover) {
+  .pp-logos-list li:hover .logo-name {
+    opacity: 1;
+  }
 }
 
 .pp-logos-list img {
@@ -501,9 +545,6 @@ watchEffect(() => {
 .pp-text :deep(.c-bleu) {
   color: var(--c-bleu);
 }
-.pp-text :deep(.c-jaune) {
-  color: var(--c-jaune);
-}
 
 .project-page {
   /* Versions assez foncées de ta palette pour rester lisibles sur du blanc */
@@ -544,12 +585,35 @@ watchEffect(() => {
     min-height: 70svh;
     padding: 4rem 6vw;
   }
+
+  .project-page {
+    --char-w: 0.66; /* un peu de marge de sécurité pour le titre */
+  }
+
+  /* Le contenu de l'introduction ne dépasse jamais l'écran */
+  .pp-intro-inner {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .pp-logos {
+    width: 100%;
+  }
+
+  .pp-text-heading {
+    font-size: clamp(1.9rem, 9vw, 2.6rem);
+  }
+
+  .pp-next-title {
+    font-size: clamp(3rem, 16vw, 6rem);
+  }
 }
 
 /* --- DESKTOP : ruban horizontal --- */
 @media (min-width: 1024px) {
   .project-page {
     --intro-pad: 20vw; /* décalage du titre depuis la gauche */
+    --title-w: calc(85vw - var(--intro-pad) - 6vw);
     --image-w: 42vw; /* largeur des images */
     --text-w: 40vw; /* largeur des zones de texte */
     --gap: 8vw; /* espace entre deux éléments du ruban */
@@ -584,6 +648,12 @@ watchEffect(() => {
     align-items: center;
     width: 85vw;
     padding-left: var(--intro-pad);
+    padding-right: 6vw;
+  }
+
+  .pp-intro-inner {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .pp-image {

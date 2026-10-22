@@ -94,15 +94,15 @@ export const projects: Project[] = [
       {name: 'HTML', src: html},
       {name: 'CSS', src: css},
       {name: 'Typescript', src: typescript},
-      {name: 'vue3', src: vue3},
-      {name: 'node', src: node},
-      {name: 'mysql', src: mysql},
-      {name: 'gsap', src: gsap},
-      {name: 'd3', src: d3},
-      {name: 'affinity', src: affinity},
-      {name: 'figma', src: figma},
-      {name: 'canva', src: canva},
-      {name: 'notion', src: notion},
+      {name: 'Vue.js', src: vue3},
+      {name: 'Node.js', src: node},
+      {name: 'MySQL', src: mysql},
+      {name: 'GSAP', src: gsap},
+      {name: 'D3', src: d3},
+      {name: 'Affinity', src: affinity},
+      {name: 'Figma', src: figma},
+      {name: 'Canva', src: canva},
+      {name: 'Notion', src: notion},
     ],
     images: [
       { src: hugCover, alt: 'Maquette de la plateforme HUG', theme: 'light' },
@@ -152,9 +152,9 @@ export const projects: Project[] = [
     color: '#FFA0A0',
     skills: ['Marketing', 'Communication'],
     logos: [
-      {name: 'figma', src: figma},
-      {name: 'canva', src: canva},
-      {name: 'affinity', src: affinity},
+      {name: 'Figma', src: figma},
+      {name: 'Canva', src: canva},
+      {name: 'Affinity', src: affinity},
     ],
     images: [
       { src: etoileCover, alt: 'Etoile Blanche' },
@@ -198,9 +198,9 @@ export const projects: Project[] = [
     color: '#70BBE6',
     skills: ['Design UX', 'Design UI'],
     logos: [
-      {name: 'figma', src: figma},
-      {name: 'affinity', src: affinity},
-      {name: 'davinci', src: davinci}
+      {name: 'Figma', src: figma},
+      {name: 'Affinity', src: affinity},
+      {name: 'Davinci', src: davinci}
     ],
     images: [
       { src: noraaCover, alt: 'Noraa' },
@@ -254,9 +254,9 @@ Son parti pris : **==vert:informer sans angoisser==**. Noraa n’affiche aucun s
       {name: 'HTML', src: html},
       {name: 'CSS', src: css},
       {name: 'Javascript', src: javascript},
-      {name: 'node', src: node},
-      {name: 'gsap', src: gsap},
-      {name: 'd3', src: d3},
+      {name: 'Node.js', src: node},
+      {name: 'GSAP', src: gsap},
+      {name: 'D3', src: d3},
     ],
     images: [
       { src: visuCover, alt: 'Visualisation des données' },
@@ -294,8 +294,8 @@ Nous avons aussi **==rose:documenté les biais==**, tel que l’inflation qui n�
     color: '#F2A900',
     skills: ['Marketing', 'Communication'],
     logos: [
-      {name: 'figma', src: figma},
-      {name: 'wordpress', src: wordpress},
+      {name: 'Figma', src: figma},
+      {name: 'Wordpress', src: wordpress},
     ],
     images: [
       { src: modterraCover, alt: 'Boutique en ligne' },

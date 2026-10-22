@@ -62,7 +62,23 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
         <p class="title-section-skill">{{ skill }}</p>
         <p class="title-section-project">{{ title }}</p>
         <p class="title-section-text">{{ text }}</p>
-        <span>{{ button }}</span>
+
+        <span class="title-section-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M7 17 17 7" />
+            <path d="M8 7h9v9" />
+          </svg>
+        </span>
+
+        <!-- Texte invisible, lu par les lecteurs d'écran -->
+        <span class="sr-only">{{ button }}</span>
       </div>
     </RouterLink>
   </section>
@@ -120,7 +136,7 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 
 .title-section-skill {
   font-family: var(--font-project-skill);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .title-section-project {
@@ -167,6 +183,56 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 
 .title-section-text + .title-section-text {
   margin-top: 1rem;
+}
+
+/* Icône de lien : une flèche dans un cercle */
+.title-section-icon {
+  display: grid;
+  place-items: center;
+  align-self: flex-start;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-top: 0.5rem;
+  border: 1px solid currentColor;
+  color: #111111;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
+}
+
+.title-section-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  transition: transform 0.25s ease;
+}
+
+/* Au survol de la carte : le cercle se remplit et la flèche part en diagonale */
+.title-section-button:hover .title-section-icon {
+  background: #111111;
+  color: #ffffff;
+}
+
+.title-section-button:hover .title-section-icon svg {
+  transform: translate(2px, -2px);
+}
+
+/* Au clavier */
+.title-section-button:focus-visible .title-section-icon {
+  outline: 2px solid #111111;
+  outline-offset: 3px;
+}
+
+/* Texte réservé aux lecteurs d'écran */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @media (min-width: 1024px) {
