@@ -96,6 +96,7 @@ onUnmounted(() => {
   align-items: center;
   padding: 1.5rem 4vw;
   pointer-events: none; /* le fond laisse passer les clics/scroll */
+  background: linear-gradient(180deg,rgba(255, 255, 255, 0.527), rgba(255, 255, 255, 0));
 }
 
 .navbar-brand,
@@ -119,11 +120,11 @@ onUnmounted(() => {
 
 .navbar-links {
   display: flex;
-  gap: 2.5rem;
+  gap: 4.5rem;
 }
 
 .navbar-link {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-family: var(--font-body);
   position: relative;
 }
@@ -150,6 +151,7 @@ onUnmounted(() => {
 @media (max-width: 1023px) {
   .navbar {
     padding: 1rem 5vw;
+    background: linear-gradient(180deg,rgba(114, 114, 114, 0.3), rgba(255, 255, 255, 0.3));
   }
 
   .navbar-links {

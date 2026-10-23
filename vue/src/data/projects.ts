@@ -193,7 +193,7 @@ export const projects: Project[] = [
   {
     slug: 'noraa',
     title: 'Noraa',
-    summary: 'Texte de présentation à compléter.',
+    summary: `Conception d'une application de suivi de santé.`,
     cover: noraaCover,
     color: '#70BBE6',
     skills: ['Design UX', 'Design UI'],
@@ -245,8 +245,8 @@ Son parti pris : **==vert:informer sans angoisser==**. Noraa n’affiche aucun s
   },
   {
     slug: 'visualisation-donnees',
-    title: 'Visualisation des données',
-    summary: 'Texte de présentation à compléter.',
+    title: 'Visualisation de données',
+    summary: `Visualisation de données sous forme d'un scrollytelling.`,
     cover: visuCover,
     color: '#94E998',
     skills: ['Développement full-stack'],

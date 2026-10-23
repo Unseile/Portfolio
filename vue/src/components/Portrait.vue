@@ -201,7 +201,7 @@ withDefaults(
   font-family: var(--font-body);
   font-size: 0.95rem;
   text-decoration: none;
-  cursor: pointer;
+  /* cursor: pointer; */
   transition:
     background 0.25s ease,
     color 0.25s ease,

@@ -670,5 +670,11 @@ watchEffect(() => {
     width: 100vw;
     margin-left: calc(var(--gap) * 0.2);
   }
+
+  .pp-next-caption {
+    margin-top: 1.5rem;
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+  }
 }
 </style>

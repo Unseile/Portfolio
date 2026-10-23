@@ -11,7 +11,7 @@ interface RotatingWord {
 // Les mots apparaissent dans l'ordre de cette liste
 const words: RotatingWord[] = [
   { text: "design", color: "#39803C", top: "25vh", left: "38vw" },
-  { text: "développement Web", color: "#FFA0A0", top: "40vh", left: "20vw" },
+  { text: "développement web", color: "#FFA0A0", top: "40vh", left: "20vw" },
   { text: "marketing", color: "#70BBE6", top: "55vh", left: "56vw" },
 ];
 </script>
@@ -98,10 +98,6 @@ const words: RotatingWord[] = [
   }
 }
 
-.hero-name {
-  display: none; /* uniquement visible sur mobile */
-}
-
 @media (max-width: 1023px) {
   .rotating-text {
     position: static;
@@ -109,63 +105,26 @@ const words: RotatingWord[] = [
   }
 
   .rotating-static {
-    position: static;
     font-size: clamp(1rem, 4.4vw, 1.6rem);
-  }
-
-  .rotating-words {
-    /* si tu as encore ce conteneur */
-    position: static;
+    position: relative;
+    top: -2vh; /* positif = descend, négatif = monte */
+    left: 0;
+    font-size: clamp(1.7rem, 4.4vw, 1.6rem);
   }
 
   .rotating-word {
     position: static;
     display: block;
     width: fit-content;
+    margin-right: auto; /* petit escalier */
+    margin-left: calc(var(--i) * 0vw); /* escalier vers la gauche */
     max-width: calc(100% - var(--i) * 5vw);
-    margin-left: calc(var(--i) * 5vw); /* petit escalier */
-    font-size: clamp(1.9rem, 8.6vw, 4rem); /* était 12vw : trop grand */
-    line-height: 1.05;
+    font-size: clamp(2rem, 8.6vw, 4rem); /* était 12vw : trop grand */
+    line-height: 1.2;
     white-space: normal;
     overflow-wrap: anywhere;
     transform: none !important;
-  }
-}
-
-@media (max-width: 1023px) {
-  .viewport-wrapper {
-    width: 100%;
-    height: auto; /* le contenu peut maintenant dépasser et défiler */
-    overflow: visible;
-  }
-
-  .horizontal-container {
-    gap: 0;
-    padding: 0;
-  }
-
-  /* Accueil : nom + mots, centrés dans le premier écran */
-  .text-slide {
-    min-height: 100vh;
-    min-height: 100svh; /* tient compte de la barre d'adresse mobile */
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 1.5rem;
-    padding: 6rem 6vw 3rem;
-  }
-
-  .video-mask-wrapper {
-    display: none;
-  }
-
-  .hero-name {
-    display: block;
-    font-family: var(--font-background);
-    font-weight: normal;
-    font-size: clamp(3.2rem, 17vw, 6rem);
-    line-height: 0.95;
-    color: #39803c;
+    margin-top: 2rem;
   }
 }
 </style>

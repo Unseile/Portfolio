@@ -480,7 +480,7 @@ onUnmounted(() => {
     justify-content: center;
     align-items: flex-start;
     gap: 1.5rem;
-    padding: 6rem 6vw 3rem;
+    padding: 0rem 6vw 3rem;
   }
 
   .video-mask-wrapper {

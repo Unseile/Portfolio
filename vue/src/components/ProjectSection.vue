@@ -141,7 +141,8 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 
 .title-section-project {
   font-family: var(--font-title);
-  font-size: 2rem;
+  font-size: 2.5rem;
+  margin-top: 1.5rem;
 }
 
 .title-section-button {
@@ -165,7 +166,7 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   translate: 0 -50%; /* remplace transform: translateY(-50%) */
   z-index: 2;
   width: var(--block-w);
-  padding: 2.5rem;
+  padding: 2rem;
   background: #ffffff;
 
   display: flex;
@@ -174,11 +175,12 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 }
 
 .title-section-text {
-  font-family: var(--font-project-body);
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: normal;
   line-height: 1.6;
   color: #111111; /* était #ffffff : invisible sur un bloc blanc */
+  margin-bottom: 1.5rem;
 }
 
 .title-section-text + .title-section-text {
