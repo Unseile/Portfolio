@@ -307,7 +307,8 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 
   /* La première section projet porte le titre : un peu plus de place pour le menu */
   .title-section:not(.is-followup) {
-    padding-top: 5rem;
+    padding-top: 2rem;
+    scroll-margin-top: 4rem;
   }
 
   .title-section-numbers {
@@ -319,31 +320,43 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
     transform: none;
     margin-bottom: 4rem;
     font-size: clamp(3.5rem, 18vw, 6rem);
-    text-align: center;
+    text-align: left;
   }
 
   .title-section-image {
     position: static;
     order: 2; /* l'image passe sous le titre */
     width: 100%;
-    height: 38vh;
+    height: 34vh;
   }
 
   .title-section-block {
     position: static;
-    order: 3;
     transform: none;
     translate: none;
-    align-self: flex-end;
     width: 100%;
-    margin-top: -3rem; /* la carte chevauche le bas de l'image */
-    padding: 1.5rem;
+    padding: 2rem;
     box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.12);
+    line-height: 4rem;
   }
 
   .title-section-project {
-    margin-bottom: -1rem;
+    margin-bottom: -0.5rem;
     line-height: 2rem;
+    font-size: 2rem;
+  }
+
+  .title-section-button {
+    display: block;
+    order: 3;
+    align-self: flex-end;
+    width: 100%;
+    margin-top: -3rem; /* la carte chevauche le bas de l'image */
+  }
+
+  .title-section-skill {
+    line-height: 1.5rem;
+    margin-top: 2.5rem;
   }
 }
 </style>
