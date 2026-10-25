@@ -329,8 +329,12 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
     position: relative;
     z-index: 0;
     order: 2;
+    flex: 0 0 auto;           /* ne rétrécit jamais */
     width: 100%;
-    height: 34vh;
+    height: auto;
+    aspect-ratio: 4 / 3;      /* la hauteur suit la largeur de l'écran, pas la hauteur du téléphone */
+    object-fit: cover;
+    background: #ececec;      /* gris clair : on voit la zone même si l'image est très claire ou en chargement */
   }
 
   .title-section-block {
@@ -350,12 +354,12 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 
   .title-section-button {
     position: relative;
-    z-index: 1;                    /* la carte passe toujours devant l'image */
+    z-index: 1;               /* la carte passe devant l'image, jamais derrière */
     display: block;
     order: 3;
     align-self: flex-end;
     width: 100%;
-    margin-top: calc(var(--card-overlap) * -1);
+    margin-top: 0;            /* plus de chevauchement */
   }
 
   .title-section-skill {
