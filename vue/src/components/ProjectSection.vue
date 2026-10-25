@@ -296,6 +296,8 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 /* --- MOBILE : tout s'empile, le bloc chevauche le bas de l'image --- */
 @media (max-width: 1023px) {
   .title-section {
+    --card-overlap: 0rem;
+    --image-offset: 0rem;
     width: 100%;
     height: auto;
     min-height: 0;
@@ -324,8 +326,9 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   }
 
   .title-section-image {
-    position: static;
-    order: 2; /* l'image passe sous le titre */
+    position: relative;
+    z-index: 0;
+    order: 2;
     width: 100%;
     height: 34vh;
   }
@@ -337,7 +340,6 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
     width: 100%;
     padding: 2rem;
     box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.12);
-    line-height: 4rem;
   }
 
   .title-section-project {
@@ -347,16 +349,18 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   }
 
   .title-section-button {
+    position: relative;
+    z-index: 1;                    /* la carte passe toujours devant l'image */
     display: block;
     order: 3;
     align-self: flex-end;
     width: 100%;
-    margin-top: -3rem; /* la carte chevauche le bas de l'image */
+    margin-top: calc(var(--card-overlap) * -1);
   }
 
   .title-section-skill {
     line-height: 1.5rem;
-    margin-top: 2.5rem;
+    margin-top: 0;                 /* était 2.5rem : plus nécessaire sans chevauchement */
   }
 }
 </style>
