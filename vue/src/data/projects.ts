@@ -291,7 +291,7 @@ Nous avons aussi **==rose:documenté les biais==**, tel que l’inflation qui n�
     title: 'E-commerce',
     summary: "Conception et mise en ligne d'une boutique fictive de bijoux en céramique faits main.",
     cover: modterraCover,
-    color: '#F2A900',
+    color: '#FFA0A0',
     skills: ['Marketing', 'Communication'],
     logos: [
       {name: 'Figma', src: figma},

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { siteReady } from "../composables/usePreloader";
+
 interface RotatingWord {
   text: string;
   color: string;
@@ -17,7 +19,7 @@ const words: RotatingWord[] = [
 </script>
 
 <template>
-  <div class="rotating-text">
+  <div class="rotating-text" :class="{ 'is-ready': siteReady }">
     <p class="rotating-static">Un mélange de</p>
 
     <span
@@ -76,6 +78,11 @@ const words: RotatingWord[] = [
   animation-delay: calc(
     var(--delay-start) + (var(--i) + 1) * var(--delay-step)
   );
+  animation-play-state: paused;
+}
+
+.rotating-text.is-ready .rotating-word {
+  animation-play-state: running;
 }
 
 /* Flou → net */
@@ -107,7 +114,7 @@ const words: RotatingWord[] = [
   .rotating-static {
     font-size: clamp(1rem, 4.4vw, 1.6rem);
     position: relative;
-    top: -2vh; /* positif = descend, négatif = monte */
+    top: -4vh; /* positif = descend, négatif = monte */
     left: 0;
     font-size: clamp(1.7rem, 4.4vw, 1.6rem);
   }
@@ -124,7 +131,7 @@ const words: RotatingWord[] = [
     white-space: normal;
     overflow-wrap: anywhere;
     transform: none !important;
-    margin-top: 2rem;
+    margin-top: 1rem;
   }
 }
 </style>
