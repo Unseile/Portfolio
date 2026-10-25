@@ -83,55 +83,39 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
     </RouterLink>
   </section>
 </template>
-
 <style scoped>
+/* ===================== COMMUN (desktop et mobile) ===================== */
 .title-section {
-  --num-gap: 4vw; /* espace entre la colonne et l'image */
+  --num-gap: 4vw; /* espace entre la colonne de numéros et l'image */
   --num-size: clamp(8rem, 26vh, 18rem); /* taille des numéros */
-  --image-w: 42vw; /* largeur de l'image */
   --block-w: min(30vw, 28rem); /* largeur du bloc */
   --margin-r: -9vw; /* négatif : le bloc dépasse du bord droit de l'écran */
   --overlap: 5vw; /* de combien le bloc passe sur l'image */
   --followup-pull: 25vw; /* de combien les sections suivantes sont rapprochées */
   --lead-space: 12vw;
   --image-w: 40rem;
-  --num-color: #111111; /* couleur par défaut, remplacée par la prop numberColor */
-  --num-opacity: 0.5; /* transparence : c'est de l'arrière-plan */
-
-  /* L'image se place toute seule à partir du bloc */
+  --num-color: #111111; /* remplacée par la prop numberColor */
+  --num-opacity: 0.5;
   --image-offset: calc(var(--margin-r) + var(--block-w) - var(--overlap));
 
   position: relative;
-  flex: 0 0 auto; /* ne se rétrécit pas dans le conteneur flex */
-  width: 100vw;
-  height: 100vh;
-  /* overflow: hidden retiré : le bloc peut sortir de la section */
+  flex: 0 0 auto;
 }
 
-/* Image : toute la hauteur */
 .title-section-image {
-  position: absolute;
-  top: 0;
-  right: var(--image-offset);
-  width: var(--image-w);
-  height: 100%;
   object-fit: cover;
   z-index: 0;
 }
 
-/* Titre : à gauche, sur deux lignes */
 .title-section-title {
-  position: absolute;
-  top: 50%; /* était 30vh */
-  left: 1vw;
-  transform: translateY(-50%); /* centre le titre sur la ligne médiane */
-  z-index: 1;
   font-family: var(--font-chapter);
   font-weight: normal;
-  font-size: 10rem; /* se réduit sur les écrans peu hauts ou étroits */
   line-height: 0.95;
   color: #111111;
-  text-align: center;
+}
+
+.title-section-title span {
+  display: block; /* une ligne par span */
 }
 
 .title-section-skill {
@@ -141,34 +125,17 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 
 .title-section-project {
   font-family: var(--font-title);
-  font-size: 2.5rem;
-  margin-top: 1.5rem;
 }
 
 .title-section-button {
-  display: inline-block;
   text-decoration: none;
   color: inherit;
   font-family: var(--font-project-body);
-  align-self: flex-start; /* sans ça, le bouton s'étire sur toute la largeur du bloc */
-  margin-top: 0.5rem; /* un peu plus d'air avant le bouton */
 }
 
-.title-section-title span {
-  display: block; /* une ligne par span */
-}
-
-/* Bloc : à droite de l'image, il passe un peu dessus */
 .title-section-block {
-  position: absolute;
-  top: 50%; /* remplace bottom: 35vh */
-  right: var(--margin-r);
-  translate: 0 -50%; /* remplace transform: translateY(-50%) */
-  z-index: 2;
-  width: var(--block-w);
   padding: 2rem;
   background: #ffffff;
-
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -179,15 +146,11 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   font-size: 1rem;
   font-weight: normal;
   line-height: 1.6;
-  color: #111111; /* était #ffffff : invisible sur un bloc blanc */
+  color: #111111;
   margin-bottom: 1.5rem;
 }
 
-.title-section-text + .title-section-text {
-  margin-top: 1rem;
-}
-
-/* Icône de lien : une flèche dans un cercle */
+/* Icône de lien */
 .title-section-icon {
   display: grid;
   place-items: center;
@@ -208,7 +171,6 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   transition: transform 0.25s ease;
 }
 
-/* Au survol de la carte : le cercle se remplit et la flèche part en diagonale */
 .title-section-button:hover .title-section-icon {
   background: #111111;
   color: #ffffff;
@@ -218,7 +180,6 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   transform: translate(2px, -2px);
 }
 
-/* Au clavier */
 .title-section-button:focus-visible .title-section-icon {
   outline: 2px solid #111111;
   outline-offset: 3px;
@@ -237,48 +198,7 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   border: 0;
 }
 
-@media (min-width: 1024px) {
-  /* Première section projet (celle qui a un titre) */
-  .title-section:not(.is-followup) {
-    margin-left: var(--lead-space);
-  }
-
-  /* Sections suivantes : déjà en place */
-  .title-section.is-followup {
-    width: calc(100vw - var(--followup-pull));
-  }
-}
-
-/* Colonne de numéros, à gauche de l'image */
-.title-section-numbers {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: calc(
-    var(--image-offset) + var(--image-w) + var(--num-gap)
-  ); /* remplace left: 30vw */
-  width: max-content;
-  padding: 0 1vw;
-  overflow: hidden;
-  z-index: 0;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    #000 15%,
-    #000 85%,
-    transparent
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    #000 15%,
-    #000 85%,
-    transparent
-  );
-  opacity: var(--num-opacity);
-}
-
+/* Numéros (affichés seulement sur desktop) */
 .title-section-numbers-track {
   will-change: transform;
 }
@@ -293,21 +213,99 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   user-select: none;
 }
 
-/* --- MOBILE : tout s'empile, le bloc chevauche le bas de l'image --- */
+/* ============================ DESKTOP ============================ */
+@media (min-width: 1024px) {
+  .title-section {
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* Première section projet (celle qui a un titre) */
+  .title-section:not(.is-followup) {
+    margin-left: var(--lead-space);
+  }
+
+  /* Sections suivantes */
+  .title-section.is-followup {
+    width: calc(100vw - var(--followup-pull));
+  }
+
+  .title-section-image {
+    position: absolute;
+    top: 0;
+    right: var(--image-offset);
+    width: var(--image-w);
+    height: 100%;
+  }
+
+  .title-section-title {
+    position: absolute;
+    top: 50%;
+    left: 1vw;
+    transform: translateY(-50%); /* centre le titre sur la ligne médiane */
+    z-index: 1;
+    font-size: 10rem;
+    text-align: center;
+  }
+
+  .title-section-project {
+    font-size: 2.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .title-section-button {
+    display: inline-block;
+    margin-top: 0.5rem;
+  }
+
+  .title-section-block {
+    position: absolute;
+    top: 50%;
+    right: var(--margin-r);
+    translate: 0 -50%; /* centre le bloc sur la ligne médiane */
+    z-index: 2;
+    width: var(--block-w);
+  }
+
+  /* Colonne de numéros, à gauche de l'image */
+  .title-section-numbers {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: calc(var(--image-offset) + var(--image-w) + var(--num-gap));
+    width: max-content;
+    padding: 0 1vw;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 15%,
+      #000 85%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 15%,
+      #000 85%,
+      transparent
+    );
+    opacity: var(--num-opacity);
+  }
+}
+
+/* ============================= MOBILE ============================= */
 @media (max-width: 1023px) {
   .title-section {
-    --card-overlap: 0rem;
-    --image-offset: 0rem;
-    width: 100%;
-    height: auto;
-    min-height: 0;
-    margin-left: 0;
     display: flex;
     flex-direction: column;
+    width: 100%;
     padding: 3rem 5vw;
   }
 
-  /* La première section projet porte le titre : un peu plus de place pour le menu */
+  /* Première section projet : le titre remonte */
   .title-section:not(.is-followup) {
     padding-top: 2rem;
     scroll-margin-top: 4rem;
@@ -318,8 +316,6 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   }
 
   .title-section-title {
-    position: static;
-    transform: none;
     margin-bottom: 4rem;
     font-size: clamp(3.5rem, 18vw, 6rem);
     text-align: left;
@@ -327,44 +323,37 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 
   .title-section-image {
     position: relative;
-    z-index: 0;
-    order: 2;
-    flex: 0 0 auto; /* ne rétrécit jamais */
+    order: 2; /* l'image passe sous le titre */
+    flex: 0 0 auto;
     width: 100%;
     height: auto;
-    aspect-ratio: 4 / 3; /* la hauteur suit la largeur de l'écran, pas la hauteur du téléphone */
-    object-fit: cover;
-    background: #ececec; /* gris clair : on voit la zone même si l'image est très claire ou en chargement */
-  }
-
-  .title-section-block {
-    position: static;
-    transform: none;
-    translate: none;
-    width: 100%;
-    padding: 2rem;
-    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.12);
-  }
-
-  .title-section-project {
-    margin-bottom: -0.5rem;
-    line-height: 2rem;
-    font-size: 2rem;
+    aspect-ratio: 4 / 3; /* la hauteur suit la largeur de l'écran */
+    background: #ececec;
   }
 
   .title-section-button {
     position: relative;
-    z-index: 1; /* la carte passe devant l'image, jamais derrière */
+    z-index: 1; /* la carte passe devant l'image */
     display: block;
     order: 3;
     align-self: flex-end;
     width: 100%;
-    margin-top: 0; /* plus de chevauchement */
+  }
+
+  .title-section-block {
+    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.12);
+    translate: none;
   }
 
   .title-section-skill {
     line-height: 1.5rem;
-    margin-top: 0; /* était 2.5rem : plus nécessaire sans chevauchement */
+  }
+
+  .title-section-project {
+    margin-top: 1.5rem;
+    margin-bottom: -0.5rem;
+    font-size: 2rem;
+    line-height: 2rem;
   }
 }
 </style>
