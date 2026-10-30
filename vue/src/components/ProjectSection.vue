@@ -86,7 +86,7 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
 <style scoped>
 /* ===================== COMMUN (desktop et mobile) ===================== */
 .title-section {
-  --num-gap: 4vw; /* espace entre la colonne de numéros et l'image */
+  --num-gap: 1.5vw; /* espace entre la colonne de numéros et l'image */
   --num-size: clamp(8rem, 26vh, 18rem); /* taille des numéros */
   --block-w: min(30vw, 28rem); /* largeur du bloc */
   --margin-r: -9vw; /* négatif : le bloc dépasse du bord droit de l'écran */
@@ -208,7 +208,7 @@ const hasTitle = computed(() => !!(props.line1 || props.line2));
   text-align: center;
   font-family: var(--font-title);
   font-size: var(--num-size);
-  line-height: 1;
+  line-height: 1.2;
   color: var(--num-color);
   user-select: none;
 }

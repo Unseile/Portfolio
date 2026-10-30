@@ -119,9 +119,9 @@ export const projects: Project[] = [
     approach: {
       paragraphs: [`Nous avons travaillé en équipe de sept, **==vert:en Scrum==**, avec trois sprints d’une semaine, un stand-up quotidien et un suivi sous **==bleu:Notion==** (Kanban, user stories, burndown chart). Nous avons d’abord étudié ce qui existe ailleurs, puis imaginé une expérience volontairement ludique pour contrer l’effet « questionnaire médical froid » : **==rose:un test d’éligibilité==** en swipe, une messagerie guidée et deux mascottes, Sanguy et Blutly. Techniquement, nous avons effectué des maquettes sous Figma, puis nous avons travaillé avec Laravel, Vue 3, TypeScript, MySQL, Tailwind et DaisyUI. Enfin nous avons déployé le backend et le frontend sur Infomaniak.`],
       links: [
+        { label: 'UML', href: uml },
         { label: 'Users stories', href: user_stories },
         { label: 'Kanban', href: kanban },
-        { label: 'UML', href: uml },
       ],
     },
     role: {
@@ -217,9 +217,9 @@ Son parti pris : **==vert:informer sans angoisser==**. Noraa n’affiche aucun s
     approach: {
       paragraphs: [`Nous avons suivi le processus de **==rose:design thinking==**, de la recherche à l’interface. La recherche a donné une carte des données possibles et s’est appuyée sur trois applications existantes (Swiss-Meds, Symptomate, Ada). Deux personas aux comportements opposés ont guidé la suite. À partir de leurs **==vert:empathy maps==**, nous avons formulé trois pistes et retenu celle qui croise santé personnelle et facteurs environnementaux. Après brainstorming et comparaison d’idées, nous avons décidé de concevoir un suivi assisté et enfin, conçu l’interface : **==bleu:moodboard, user flow, wireframes, design system et prototype cliquable==** sous Figma.`],
       links: [
+        { label: 'Design system', href: noraa_design_system },
         { label: 'Userflow', href: noraa_userflow },
         { label: 'Personas', href: noraa_persona },
-        { label: 'Design system', href: noraa_design_system }
       ],
     },
     role: {
